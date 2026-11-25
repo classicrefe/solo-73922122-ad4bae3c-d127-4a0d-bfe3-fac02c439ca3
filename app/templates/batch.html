@@ -1,0 +1,88 @@
+{% extends "base.html" %}
+{% block title %}批次 #{{ batch.id }}{% endblock %}
+{% block body %}
+<div class="card">
+  <h1>批次 #{{ batch.id }} 核查结果
+    {% if batch.is_current %}<span class="pill pill-一致入库">当前生效</span>{% endif %}
+  </h1>
+  <p class="muted">
+    文件：{{ batch.map1_filename }} ／ {{ batch.map2_filename }} ／
+    {{ batch.points_filename }} ｜ 提交时间 {{ batch.created_at }}
+  </p>
+  <div class="stats">
+    <div class="stat"><b>{{ stats.n_pieces }}</b>分片总数</div>
+    <div class="stat"><b>{{ stats.status_counts.get('一致入库', 0) }}</b>两图一致</div>
+    <div class="stat"><b>{{ stats.status_counts.get('采用图一', 0) }}</b>采用图一</div>
+    <div class="stat"><b>{{ stats.status_counts.get('采用图二', 0) }}</b>采用图二</div>
+    <div class="stat"><b>{{ stats.status_counts.get('待补测', 0) }}</b>待补测</div>
+    <div class="stat"><b>{{ stats.get('n_reused', 0) }}</b>沿用原结果</div>
+    <div class="stat"><b>{{ stats.get('n_new', 0) }}</b>本次新核定</div>
+  </div>
+  <div class="stats">
+    <div class="stat"><b>{{ stats.n_points }}</b>实测点总数</div>
+    <div class="stat"><b>{{ stats.point_placement.interior }}</b>片内点（计）</div>
+    <div class="stat"><b>{{ stats.point_placement.boundary }}</b>片边点（不计）</div>
+    <div class="stat"><b>{{ stats.point_placement.outside }}</b>覆盖区外点</div>
+  </div>
+  <p>
+    <a class="btn-link" href="{{ url_for('download_ingest', batch_id=batch.id) }}">
+      下载可入库地类 WKT CSV</a>
+    <a class="btn-link secondary" href="{{ url_for('pending_view', batch_id=batch.id) }}">
+      查看待补测片边界</a>
+    <a class="btn-link secondary" href="{{ url_for('download_pending', batch_id=batch.id) }}">
+      下载待补测片 WKT CSV</a>
+  </p>
+</div>
+
+<div class="card">
+  <h2>分片图（悬停查看详情）</h2>
+  <div class="svg-wrap">{{ svg | safe }}</div>
+</div>
+
+<div class="card">
+  <h2>分片清单（{{ pieces|length }}）</h2>
+  <table>
+    <thead><tr>
+      <th>片号</th><th>图一地类</th><th>图二地类</th><th>状态</th>
+      <th>采用地类</th><th>来源</th><th>片内点数</th><th>面积(m²)</th>
+    </tr></thead>
+    <tbody>
+    {% for p in pieces %}
+      <tr>
+        <td>{{ p.piece_code }}</td>
+        <td>{{ p.class_1 }}</td>
+        <td>{{ p.class_2 }}</td>
+        <td><span class="pill pill-{{ p.status }}">{{ p.status }}</span></td>
+        <td>{{ p.adopted_class or '—' }}</td>
+        <td>{% if p.source == 'reused' %}沿用{% else %}新核定{% endif %}</td>
+        <td>{{ point_counts.get(p.piece_code, 0) }}</td>
+        <td>{{ '%.2f'|format(p.area_m2) }}</td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+<div class="card">
+  <h2>实测点归属（{{ points|length }}）</h2>
+  <table>
+    <thead><tr><th>点号</th><th>X</th><th>Y</th><th>实测地类</th>
+      <th>归属</th><th>所在片</th></tr></thead>
+    <tbody>
+    {% for pt in points %}
+      <tr>
+        <td>{{ pt.point_code }}</td>
+        <td>{{ pt.x }}</td><td>{{ pt.y }}</td>
+        <td>{{ pt.land_class }}</td>
+        <td>
+          {% if pt.placement == 'interior' %}片内
+          {% elif pt.placement == 'boundary' %}<span style="color:#ef6c00">片边（不计）</span>
+          {% else %}<span class="muted">覆盖区外</span>{% endif %}
+        </td>
+        <td>{{ pt.piece_code or '—' }}</td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

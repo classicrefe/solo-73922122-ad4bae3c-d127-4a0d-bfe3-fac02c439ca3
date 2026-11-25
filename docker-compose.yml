@@ -1,0 +1,21 @@
+services:
+  tidalflat:
+    build: .
+    image: tidalflat-check:latest
+    container_name: tidalflat-check
+    ports:
+      - "8000:8000"
+    environment:
+      DB_PATH: /data/tidalflat.db
+      SECRET_KEY: change-me-in-production
+    volumes:
+      - tidalflat_data:/data
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/', timeout=5)"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+
+volumes:
+  tidalflat_data:

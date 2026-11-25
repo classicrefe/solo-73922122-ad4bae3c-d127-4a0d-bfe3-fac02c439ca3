@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+{% block body %}
+<div class="card">
+  <h1>上传核查数据</h1>
+  <p class="muted">
+    三张 CSV 需采用同一米制坐标系。两张地类图由内部互不重叠的轴对齐矩形组成，
+    表头支持 <code>id,class,xmin,ymin,xmax,ymax</code>（地类）与
+    <code>id,x,y,class</code>（实测点），亦兼容常见中文表头。
+    整份重报时，片界与两图地类均未变的片自动沿用原核定结果。
+  </p>
+  <form action="{{ url_for('upload') }}" method="post" enctype="multipart/form-data">
+    <div class="upload-row">
+      <label>图一（地类图 CSV）
+        <input type="file" name="map1" accept=".csv,text/csv" required>
+      </label>
+      <label>图二（地类图 CSV）
+        <input type="file" name="map2" accept=".csv,text/csv" required>
+      </label>
+      <label>实测点表 CSV（含坐标与地类）
+        <input type="file" name="points" accept=".csv,text/csv" required>
+      </label>
+    </div>
+    <p style="margin-top:16px"><button type="submit">提交核查</button></p>
+  </form>
+</div>
+
+<div class="card">
+  <h2>历史批次</h2>
+  {% if batches %}
+  <table>
+    <thead><tr>
+      <th>批次</th><th>提交时间 (UTC)</th><th>图一</th><th>图二</th><th>实测点</th>
+      <th>分片数</th><th>可入库</th><th>待补测</th><th>当前</th><th></th>
+    </tr></thead>
+    <tbody>
+    {% for b in batches %}
+      <tr>
+        <td>#{{ b.id }}</td>
+        <td>{{ b.created_at }}</td>
+        <td>{{ b.map1_filename }}</td>
+        <td>{{ b.map2_filename }}</td>
+        <td>{{ b.points_filename }}</td>
+        <td>{{ b.n_pieces }}</td>
+        <td>{{ b.n_ingest }}</td>
+        <td>{{ b.n_pending }}</td>
+        <td>{% if b.is_current %}<strong>是</strong>{% else %}—{% endif %}</td>
+        <td><a href="{{ url_for('batch_detail', batch_id=b.id) }}">详情</a></td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+  <p class="muted">尚无批次，请先上传数据。</p>
+  {% endif %}
+</div>
+{% endblock %}

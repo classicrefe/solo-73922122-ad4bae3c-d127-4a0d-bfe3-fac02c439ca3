@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{% block title %}滩涂地类核查{% endblock %}</title>
+<style>
+  :root { --line:#d0d7de; --bg:#f6f8fa; --red:#c62828; --green:#2e7d32; }
+  * { box-sizing: border-box; }
+  body { margin:0; font-family: "PingFang SC","Microsoft YaHei",sans-serif;
+         color:#1f2328; background:var(--bg); }
+  header { background:#0f2f4d; color:#fff; padding:14px 28px; }
+  header a { color:#cfe3ff; text-decoration:none; margin-right:16px; }
+  main { max-width:1180px; margin:24px auto; padding:0 20px; }
+  .card { background:#fff; border:1px solid var(--line); border-radius:10px;
+          padding:20px 24px; margin-bottom:22px; }
+  h1 { font-size:20px; margin:0 0 14px; }
+  h2 { font-size:16px; margin:0 0 12px; }
+  table { border-collapse:collapse; width:100%; font-size:13px; }
+  th,td { border:1px solid var(--line); padding:7px 9px; text-align:left; }
+  th { background:#f0f3f6; }
+  .flash { padding:10px 14px; border-radius:8px; margin-bottom:14px; font-size:14px; }
+  .flash.error { background:#fdecea; border:1px solid #f5c6c2; color:var(--red); }
+  .flash.ok { background:#e8f5e9; border:1px solid #b6dbb9; color:var(--green); }
+  .upload-row { display:flex; gap:18px; flex-wrap:wrap; }
+  .upload-row label { flex:1; min-width:260px; font-size:13px; font-weight:600; }
+  input[type=file] { display:block; margin-top:6px; }
+  button { background:#0f2f4d; color:#fff; border:0; border-radius:8px;
+           padding:10px 22px; font-size:14px; cursor:pointer; }
+  button:hover { background:#1b4a78; }
+  .pill { display:inline-block; padding:2px 9px; border-radius:999px;
+          font-size:12px; white-space:nowrap; }
+  .pill-一致入库 { background:#e8f5e9; color:#2e7d32; }
+  .pill-采用图一 { background:#e3f2fd; color:#1565c0; }
+  .pill-采用图二 { background:#f3e5f5; color:#6a1b9a; }
+  .pill-待补测 { background:#fdecea; color:#c62828; }
+  .muted { color:#656d76; font-size:12px; }
+  .stats { display:flex; gap:12px; flex-wrap:wrap; margin-bottom:14px; }
+  .stat { background:#f0f3f6; border-radius:8px; padding:10px 16px; font-size:13px; }
+  .stat b { font-size:18px; display:block; }
+  .btn-link { display:inline-block; background:#0f2f4d; color:#fff;
+              padding:8px 16px; border-radius:8px; text-decoration:none;
+              font-size:13px; margin-right:10px; }
+  .btn-link.secondary { background:#57606a; }
+  .svg-wrap { overflow:auto; border:1px solid var(--line); border-radius:8px; }
+  code { background:#eef1f4; padding:1px 5px; border-radius:4px; }
+</style>
+</head>
+<body>
+<header>
+  <strong>滩涂地类核查入库系统</strong>
+  <span style="float:right">
+    <a href="{{ url_for('index') }}">上传 / 批次</a>
+  </span>
+</header>
+<main>
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% for category, msg in messages %}
+      <div class="flash {{ category }}">{{ msg }}</div>
+    {% endfor %}
+  {% endwith %}
+  {% block body %}{% endblock %}
+</main>
+</body>
+</html>

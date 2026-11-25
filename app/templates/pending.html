@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+{% block title %}批次 #{{ batch.id }} 待补测片{% endblock %}
+{% block body %}
+<div class="card">
+  <h1>批次 #{{ batch.id }} ：待补测片边界</h1>
+  <p class="muted">
+    下列分歧片证据不足（无片内实测点、点互相矛盾，或点地类与两图均不符），
+    需外业补测后随整份地图重报。落在片边上的点不计为证据。
+  </p>
+  <p>
+    <a class="btn-link" href="{{ url_for('download_pending', batch_id=batch.id) }}">
+      下载待补测片 WKT CSV</a>
+    <a class="btn-link secondary" href="{{ url_for('batch_detail', batch_id=batch.id) }}">
+      返回批次详情</a>
+  </p>
+</div>
+
+<div class="card">
+  <h2>边界图</h2>
+  {% if pieces %}
+  <div class="svg-wrap">{{ svg | safe }}</div>
+  {% else %}
+  <p>本批次没有待补测片，所有分片均已可入库。</p>
+  {% endif %}
+</div>
+
+{% if pieces %}
+<div class="card">
+  <h2>待补测片清单（{{ pieces|length }}）</h2>
+  <table>
+    <thead><tr><th>片号</th><th>图一地类</th><th>图二地类</th>
+      <th>片内点数</th><th>面积(m²)</th><th>WKT 边界（前 120 字符）</th></tr></thead>
+    <tbody>
+    {% for p in pieces %}
+      <tr>
+        <td>{{ p.piece_code }}</td>
+        <td>{{ p.class_1 }}</td>
+        <td>{{ p.class_2 }}</td>
+        <td>{{ point_counts.get(p.piece_code, 0) }}</td>
+        <td>{{ '%.2f'|format(p.area_m2) }}</td>
+        <td><code>{{ p.wkt[:120] }}{% if p.wkt|length > 120 %}…{% endif %}</code></td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endif %}
+{% endblock %}
